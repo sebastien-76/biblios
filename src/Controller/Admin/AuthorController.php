@@ -4,10 +4,11 @@ namespace App\Controller\Admin;
 
 use App\Entity\Author;
 use App\Form\AuthorType;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\BrowserKit\Request;
 
 #[Route('/admin/author')]
 final class AuthorController extends AbstractController
@@ -21,14 +22,17 @@ final class AuthorController extends AbstractController
     }
 
     #[Route('/new', name: 'app_admin_author_new')]
-    public function new(Request $request): Response
+    public function new(Request $request, EntityManagerInterface $em): Response
     {
         $author = new Author();
         $form = $this->createForm(AuthorType::class, $author);
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-           
+           $em->persist($author);
+           $em->flush();
+
+           return $this->redirectToRoute('app_admin_author_index');
         }
 
         
