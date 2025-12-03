@@ -39,6 +39,7 @@ class AuthorType extends AbstractType
                 'choice_label' => 'id',
                 'multiple' => true,
                 'required' => false,
+                'label' => 'Livres',
             ])
         ;
     }
