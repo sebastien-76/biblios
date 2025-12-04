@@ -2,42 +2,54 @@
 
 namespace App\Controller\Admin;
 
-use Dom\Entity;
 use App\Entity\Editor;
 use App\Form\EditorType;
+use App\Repository\EditorRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Requirement\Requirement;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[Route('/admin/editor')]
 class EditorController extends AbstractController
 {
     #[Route('', name: 'app_admin_editor_index', methods: ['GET'])]
-    public function index(): Response
+    public function index(Request $request, EditorRepository $editorRepository): Response
     {
+        $editors = $editorRepository->findAll();
+
         return $this->render('admin/editor/index.html.twig', [
-            'controller_name' => 'EditorController',
+            'editors' => $editors
         ]);
     }
 
     #[Route('/new', name: 'app_admin_editor_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $em): Response
+    #[Route('/{id}/edit', name: 'app_admin_editor_edit', requirements: ['id' => Requirement::DIGITS], methods: ['GET', 'POST'])]
+    public function new(?Editor $editor, Request $request, EntityManagerInterface $manager): Response
     {
-        $editor = new Editor();
+        $editor ??= new Editor();
         $form = $this->createForm(EditorType::class, $editor);
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $em->persist($editor);
-            $em->flush();
+            $manager->persist($editor);
+            $manager->flush();
 
             return $this->redirectToRoute('app_admin_editor_index');
         }
 
         return $this->render('admin/editor/new.html.twig', [
             'form' => $form,
+        ]);
+    }
+
+    #[Route('/{id}', name: 'app_admin_editor_show', requirements: ['id' => requirement::DIGITS], methods: ['GET'])]
+    public function show(?Editor $editor): Response
+    {
+        return $this->render('admin/editor/show.html.twig', [
+            'editor' => $editor,
         ]);
     }
 }
