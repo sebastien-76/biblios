@@ -2,10 +2,9 @@
 
 namespace App\Entity;
 
-use App\Enum\CommentStatus;
+use App\Repository\CommentRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use App\Repository\CommentRepository;
 
 #[ORM\Entity(repositoryClass: CommentRepository::class)]
 class Comment
@@ -28,7 +27,7 @@ class Comment
     private ?\DateTimeImmutable $publishedAt = null;
 
     #[ORM\Column(length: 255)]
-    private ?CommentStatus $status = null;
+    private ?string $status = null;
 
     #[ORM\Column(type: Types::TEXT)]
     private ?string $content = null;
