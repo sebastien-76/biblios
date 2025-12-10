@@ -6,11 +6,12 @@ use App\Entity\Editor;
 use App\Form\EditorType;
 use App\Repository\EditorRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/admin/editor')]
 class EditorController extends AbstractController
@@ -25,10 +26,15 @@ class EditorController extends AbstractController
         ]);
     }
 
+    #[IsGranted('ROLE_AJOUT_DE_LIVRE')]
     #[Route('/new', name: 'app_admin_editor_new', methods: ['GET', 'POST'])]
     #[Route('/{id}/edit', name: 'app_admin_editor_edit', requirements: ['id' => Requirement::DIGITS], methods: ['GET', 'POST'])]
     public function new(?Editor $editor, Request $request, EntityManagerInterface $manager): Response
     {
+        if ($editor) {
+            $this->denyAccessUnlessGranted('ROLE_EDITION_DE_LIVRE');
+        }
+
         $editor ??= new Editor();
         $form = $this->createForm(EditorType::class, $editor);
 
@@ -45,7 +51,7 @@ class EditorController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_admin_editor_show', requirements: ['id' => requirement::DIGITS], methods: ['GET'])]
+    #[Route('/{id}', name: 'app_admin_editor_show', requirements: ['id' => Requirement::DIGITS], methods: ['GET'])]
     public function show(?Editor $editor): Response
     {
         return $this->render('admin/editor/show.html.twig', [
