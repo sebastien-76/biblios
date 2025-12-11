@@ -55,7 +55,7 @@ class Book
     #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'book', orphanRemoval: true)]
     private Collection $comments;
 
-    #[ORM\ManyToMany(targetEntity: Author::class, inversedBy: 'books', cascade: ['persist'])]
+    #[ORM\ManyToMany(targetEntity: Author::class, inversedBy: 'books')]
     private Collection $authors;
 
     #[ORM\ManyToOne]
@@ -211,7 +211,6 @@ class Book
     {
         if (!$this->authors->contains($author)) {
             $this->authors->add($author);
-            $author->addBook($this);
         }
 
         return $this;
@@ -219,9 +218,7 @@ class Book
 
     public function removeAuthor(Author $author): static
     {
-        if ($this->authors->removeElement($author)) {
-            $author->removeBook($this);
-        }
+        $this->authors->removeElement($author);
 
         return $this;
     }
